@@ -1,2 +1,1 @@
-# programing_bitcoin
-programing bitcoin
+# programming_bitcoin
