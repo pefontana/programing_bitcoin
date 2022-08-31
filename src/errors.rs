@@ -8,6 +8,7 @@ impl fmt::Display for NotPrimeError {
         write!(f, "The order of the field must be a prime number")
     }
 }
+
 #[derive(Debug, Clone)]
 pub struct PointNotInTheCurve;
 
