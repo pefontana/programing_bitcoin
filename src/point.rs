@@ -1,38 +1,45 @@
-use std::ops::Add;
+use std::ops::{Add, Mul};
 
 use crate::errors::PointNotInTheCurve;
+use crate::field_element::FieldElement;
 
 // Point of y**2 = x**2 + a*x + b eliptic curve
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Point<const A: i64, const B: i64> {
-    Point(i64, i64),
+pub enum Point<const A: i128, const B: i128, const P: u128> {
+    Point(FieldElement<P>, FieldElement<P>),
     Infinity,
 }
 
-impl<const A: i64, const B: i64> Point<A, B> {
-    pub fn new_point(x: i64, y: i64) -> Result<Self, PointNotInTheCurve> {
-        if y.pow(2) != x.pow(3) + A * x + B {
+impl<const A: i128, const B: i128, const P: u128> Point<A, B, P> {
+    pub fn new_point(x: FieldElement<P>, y: FieldElement<P>) -> Result<Self, PointNotInTheCurve> {
+        if y.pow(2)
+            != x.pow(3)
+                + FieldElement::<P>::new(A).unwrap() * x
+                + FieldElement::<P>::new(B).unwrap()
+        {
             return Err(PointNotInTheCurve);
         }
 
-        Ok(Point::<A, B>::Point(x, y))
+        Ok(Point::<A, B, P>::Point(x, y))
     }
     pub fn new_infinity() -> Self {
-        Point::<A, B>::Infinity
+        Point::<A, B, P>::Infinity
     }
 }
 
-impl<const A: i64, const B: i64> Add<Point<A, B>> for Point<A, B> {
+impl<const A: i128, const B: i128, const P: u128> Add<Point<A, B, P>> for Point<A, B, P> {
     type Output = Self;
 
-    fn add(self, other_point: Point<A, B>) -> Self {
+    fn add(self, other_point: Point<A, B, P>) -> Self {
         match (self, other_point) {
             (Self::Infinity, _) => other_point,
             (_, Self::Infinity) => self,
             (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 == x2 && y1 != y2 => {
                 Self::new_infinity()
             }
-            (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 == x2 && y1 == y2 && y1 == 0 => {
+            (Self::Point(x1, y1), Self::Point(x2, y2))
+                if x1 == x2 && y1 == y2 && y1 == FieldElement::<P>::new(0).unwrap() =>
+            {
                 Self::Infinity
             }
             (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 != x2 => {
@@ -42,8 +49,10 @@ impl<const A: i64, const B: i64> Add<Point<A, B>> for Point<A, B> {
                 Self::Point(x3, y3)
             }
             (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 == x2 && y1 == y2 => {
-                let slope = (3 * x1.pow(2) + A) / (2 * y1);
-                let x3 = slope.pow(2) - 2 * x1;
+                let slope = (FieldElement::<P>::new(3).unwrap() * x1.pow(2)
+                    + FieldElement::<P>::new(A).unwrap())
+                    / (FieldElement::<P>::new(2).unwrap() * y1);
+                let x3 = slope.pow(2) - FieldElement::<P>::new(2).unwrap() * x1;
                 let y3 = slope * (x1 - x3) - y1;
                 Self::Point(x3, y3)
             }
@@ -53,62 +62,78 @@ impl<const A: i64, const B: i64> Add<Point<A, B>> for Point<A, B> {
     }
 }
 
+impl<const A: i128, const B: i128, const P: u128> Mul<usize> for Point<A, B, P> {
+    type Output = Self;
+
+    fn mul(self, scalar: usize) -> Self {
+        if scalar == 0 {
+            panic!("Cant multiply by 0")
+        }
+
+        // Naive implementation
+        // for _ in 1..scalar  {
+        //     result = result + self;
+        //     println!("mult result: {:?}", result);
+        // }
+
+        let mut current = self;
+        let mut result = Point::<A, B, P>::new_infinity();
+        let mut coef = scalar;
+        while coef != 0 {
+            println!("coef: {:?}", coef);
+            if coef & 1 != 0 {
+                result = result + current;
+            }
+            current = current + current;
+            coef >>= 1;
+        }
+        result
+    }
+}
+
 #[cfg(test)]
 mod point_tests {
+    use crate::{felt, point};
+
     use super::*;
-
     #[test]
-    fn test00_create_valid_point() {
-        assert!(Point::<5, 7>::new_point(-1, -1).is_ok());
+    fn point_addition() {
+        const A: i128 = 0;
+        const B: i128 = 7;
+        const P: u128 = 223;
+
+        let point1 = point!(170, 142);
+        let point2 = point!(60, 139);
+        assert_eq!(point1 + point2, point!(220, 181));
+
+        let point3 = point!(47, 71);
+        let point4 = point!(17, 56);
+        assert_eq!(point3 + point4, point!(215, 68));
+
+        let point5 = point!(143, 98);
+        let point6 = point!(76, 66);
+        assert_eq!(point5 + point6, point!(47, 71));
     }
 
     #[test]
-    fn test01_create_invalid_point() {
-        assert!(Point::<5, 7>::new_point(-1, -2).is_err());
-    }
+    fn point_scalar_multiplication() {
+        const A: i128 = 0;
+        const B: i128 = 7;
+        const P: u128 = 223;
 
-    #[test]
-    fn test02_points_with_same_cords_are_equal() {
-        let point1 = Point::<5, 7>::new_point(-1, -1).unwrap();
-        let point2 = Point::<5, 7>::new_point(-1, -1).unwrap();
+        let point1 = point!(192, 105);
+        assert_eq!(point1 * 2, point!(49, 71));
 
-        assert_eq!(point1, point2);
-    }
+        let point2 = point!(143, 98);
+        assert_eq!(point2 * 2, point!(64, 168));
 
-    #[test]
-    fn test03_points_with_different_cords_are_different() {
-        let point1 = Point::<5, 7>::new_point(-1, -1).unwrap();
-        let point2 = Point::<5, 7>::new_point(18, 77).unwrap();
+        let point3 = point!(47, 71);
+        assert_eq!(point3 * 2, point!(36, 111));
 
-        assert_ne!(point1, point2);
-    }
+        assert_eq!(point3 * 4, point!(194, 51));
 
-    #[test]
-    fn test04_sum_inifity_and_another_point_returns_the_point() {
-        let infinity = Point::<5, 7>::new_infinity();
-        let point = Point::<5, 7>::new_point(-1, -1).unwrap();
+        assert_eq!(point3 * 8, point!(116, 55));
 
-        assert_eq!(point + infinity, point);
-        assert_eq!(infinity + point, point);
-    }
-
-    #[test]
-    fn test05_two_different_points_from_the_same_curve_can_be_added() {
-        let point1 = Point::<5, 7>::new_point(2, 5).unwrap();
-        let point2 = Point::<5, 7>::new_point(-1, -1).unwrap();
-        let expected_point3 = Point::<5, 7>::new_point(3, -7).unwrap();
-
-        assert_eq!(point1 + point2, expected_point3);
-        assert_eq!(point2 + point1, expected_point3);
-    }
-
-    #[test]
-    fn test06_adding_the_same_point_results_infinity() {
-        let point1 = Point::<5, 7>::new_point(-1, -1).unwrap();
-        let point2 = Point::<5, 7>::new_point(-1, 1).unwrap();
-
-        let expected_point3 = Point::<5, 7>::new_infinity();
-
-        assert_eq!(point1 + point2, expected_point3);
+        assert_eq!(point3 * 21, Point::<A, B, P>::new_infinity());
     }
 }

@@ -1,7 +1,7 @@
 use crate::errors::NotPrimeError;
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy)]
 pub struct FieldElement<const P: u128> {
     pub num: i128,
 }
@@ -67,6 +67,7 @@ impl<const P: u128> FieldElement<P> {
         let mut num = self.num;
         for _ in 1..exp {
             num *= self.num;
+            num = num.rem_euclid(P as i128);
         }
         Self {
             num: num.rem_euclid(P as i128),
