@@ -1,10 +1,20 @@
 #[macro_export]
 macro_rules! felt {
     ($num: expr) => {
-        FieldElement::<P>::new($num).unwrap()
+        FieldElement::new(Into::<BigInt>::into($num))
     };
-    ($prime: expr, $num: expr) => {
-        FieldElement::<$prime>::new($num).unwrap()
+}
+#[macro_export]
+macro_rules! bigint {
+    ($val : expr) => {
+        Into::<BigInt>::into($val)
+    };
+}
+
+#[macro_export]
+macro_rules! bigint_str {
+    ($val: expr) => {
+        BigInt::parse_bytes($val, 10).unwrap()
     };
 }
 
