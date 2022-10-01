@@ -1,4 +1,4 @@
-use crate::{bigint, constants::PRIME, errors::NotPrimeError};
+use crate::{bigint, constants::PRIME};
 use num_bigint::BigInt;
 use num_integer::Integer;
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign};
@@ -23,12 +23,52 @@ impl Add<FieldElement> for FieldElement {
     }
 }
 
+impl Add<&FieldElement> for FieldElement {
+    type Output = FieldElement;
+
+    fn add(self, other_field_elem: &FieldElement) -> FieldElement {
+        FieldElement {
+            num: (self.num + &other_field_elem.num).mod_floor(&PRIME),
+        }
+    }
+}
+
 impl Sub<FieldElement> for FieldElement {
     type Output = Self;
 
     fn sub(self, other_field_elem: Self) -> Self {
         Self {
             num: (self.num - other_field_elem.num).mod_floor(&PRIME),
+        }
+    }
+}
+
+impl Sub<&FieldElement> for &FieldElement {
+    type Output = FieldElement;
+
+    fn sub(self, other_field_elem: &FieldElement) -> FieldElement {
+        FieldElement {
+            num: (&self.num - &other_field_elem.num).mod_floor(&PRIME),
+        }
+    }
+}
+
+impl Sub<&FieldElement> for FieldElement {
+    type Output = FieldElement;
+
+    fn sub(self, other_field_elem: &FieldElement) -> FieldElement {
+        FieldElement {
+            num: (self.num - &other_field_elem.num).mod_floor(&PRIME),
+        }
+    }
+}
+
+impl Mul<&FieldElement> for &FieldElement {
+    type Output = FieldElement;
+
+    fn mul(self, other_field_elem: &FieldElement) -> FieldElement {
+        FieldElement {
+            num: (&self.num * &other_field_elem.num).mod_floor(&PRIME),
         }
     }
 }
@@ -63,6 +103,14 @@ impl Div<FieldElement> for FieldElement {
 
     fn div(self, other_field_elem: Self) -> Self {
         self * other_field_elem.pow(&*PRIME - 2)
+    }
+}
+
+impl Div<&FieldElement> for &FieldElement {
+    type Output = FieldElement;
+
+    fn div(self, other_field_elem: &FieldElement) -> FieldElement {
+        self * &other_field_elem.pow(&*PRIME - 2)
     }
 }
 

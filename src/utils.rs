@@ -21,6 +21,6 @@ macro_rules! bigint_str {
 #[macro_export]
 macro_rules! point {
     ($x: expr, $y:expr) => {
-        Point::<A, B, P>::new_point(felt!($x), felt!($y)).unwrap()
+        Point::new_point(felt!($x), felt!($y)).unwrap()
     };
 }

@@ -4,7 +4,7 @@ use crate::field_element::FieldElement;
 pub mod constants;
 pub mod errors;
 pub mod field_element;
-// pub mod point;
+pub mod point;
 pub mod utils;
 
 fn main() {
