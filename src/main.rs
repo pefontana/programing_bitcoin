@@ -1,6 +1,6 @@
 // use point::Point;
 
-use crate::field_element::FieldElement;
+// use crate::field_element::FieldElement;
 pub mod constants;
 pub mod errors;
 pub mod field_element;

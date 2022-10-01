@@ -24,6 +24,17 @@ impl Point {
     pub fn new_infinity() -> Self {
         Point::Infinity
     }
+
+    pub fn new_point_from_ref(
+        x: &FieldElement,
+        y: &FieldElement,
+    ) -> Result<Self, PointNotInTheCurve> {
+        if y.pow(bigint!(2)) != x.pow(bigint!(3)) + &*A * x + &*B {
+            return Err(PointNotInTheCurve);
+        }
+
+        Ok(Point::Point(x.clone(), y.clone()))
+    }
 }
 
 impl Add<Point> for Point {
@@ -145,6 +156,7 @@ mod point_tests {
     use crate::{felt, point};
 
     use super::*;
+    #[test]
     #[test]
     fn point_addition() {
         let point1 = point!(170, 142);

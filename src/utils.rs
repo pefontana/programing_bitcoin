@@ -4,6 +4,21 @@ macro_rules! felt {
         FieldElement::new(Into::<BigInt>::into($num))
     };
 }
+
+#[macro_export]
+macro_rules! felt_str {
+    ($num: expr) => {
+        FieldElement::new(BigInt::parse_bytes($num, 10).unwrap())
+    };
+}
+
+#[macro_export]
+macro_rules! felt_hex {
+    ($num: expr) => {
+        FieldElement::new(BigInt::parse_bytes($num, 16).unwrap())
+    };
+}
+
 #[macro_export]
 macro_rules! bigint {
     ($val : expr) => {
