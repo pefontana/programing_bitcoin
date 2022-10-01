@@ -88,7 +88,7 @@ impl FieldElement {
     pub fn pow(&self, n: BigInt) -> Self {
         let exp = bigint!(n).mod_floor(&(&*PRIME - 1_usize));
         let mut num = self.num.clone();
-        for _ in num_iter::range_inclusive(bigint!(1), exp) {
+        for _ in num_iter::range(bigint!(1), exp) {
             num *= &self.num;
             num = num.mod_floor(&PRIME);
         }
@@ -134,7 +134,10 @@ impl MulAssign<FieldElement> for FieldElement {
 
 #[cfg(test)]
 mod tests {
-    use crate::felt;
+    use crate::{
+        constants::{G, GX, GY},
+        felt,
+    };
 
     use super::*;
 
@@ -153,6 +156,12 @@ mod tests {
 
         assert_eq!(first_field_element - second_field_element, felt!(17));
     }
+
+    #[test]
+    fn test_gx_and_gy_constants() {
+        assert_eq!(GY.pow(bigint!(2)), GX.pow(bigint!(3)) + felt!(7))
+    }
+
     // TODO
     // ADD add and sub tests with num > PRIME
 
