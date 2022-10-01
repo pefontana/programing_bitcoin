@@ -96,9 +96,7 @@ impl Mul<usize> for Point {
     type Output = Self;
 
     fn mul(self, scalar: usize) -> Self {
-        if scalar == 0 {
-            panic!("Cant multiply by 0")
-        }
+        assert!(!(scalar == 0), "Cant multiply by 0");
 
         // Naive implementation
         // for _ in 1..scalar  {
@@ -125,15 +123,7 @@ impl Mul<usize> for &Point {
     type Output = Point;
 
     fn mul(self, scalar: usize) -> Point {
-        if scalar == 0 {
-            panic!("Cant multiply by 0")
-        }
-
-        // Naive implementation
-        // for _ in 1..scalar  {
-        //     result = result + self;
-        //     println!("mult result: {:?}", result);
-        // }
+        assert!(!(scalar == 0), "Cant multiply by 0");
 
         let mut current = self.clone();
         let mut result = Point::new_infinity();
