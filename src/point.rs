@@ -4,7 +4,7 @@ use crate::constants::{A, B};
 use crate::errors::PointNotInTheCurve;
 use crate::field_element::FieldElement;
 use crate::{bigint, felt};
-use num_bigint::BigInt;
+use num_bigint_dig::BigUint;
 use num_traits::identities::Zero;
 // Point of y**2 = x**2 + a*x + b eliptic curve
 #[derive(Clone, Debug, PartialEq)]
@@ -15,7 +15,7 @@ pub enum Point {
 
 impl Point {
     pub fn new_point(x: FieldElement, y: FieldElement) -> Result<Self, PointNotInTheCurve> {
-        if y.pow(bigint!(2)) != x.pow(bigint!(3)) + &*A * &x + &*B {
+        if y.pow(bigint!(2_usize)) != x.pow(bigint!(3_usize)) + &*A * &x + &*B {
             return Err(PointNotInTheCurve);
         }
 
@@ -29,7 +29,7 @@ impl Point {
         x: &FieldElement,
         y: &FieldElement,
     ) -> Result<Self, PointNotInTheCurve> {
-        if y.pow(bigint!(2)) != x.pow(bigint!(3)) + &*A * x + &*B {
+        if y.pow(bigint!(2_usize)) != x.pow(bigint!(3_usize)) + &*A * x + &*B {
             return Err(PointNotInTheCurve);
         }
 
@@ -48,21 +48,21 @@ impl Add<Point> for Point {
                 Self::new_infinity()
             }
             (Self::Point(x1, y1), Self::Point(x2, y2))
-                if x1 == x2 && y1 == y2 && y1 == &felt!(0) =>
+                if x1 == x2 && y1 == y2 && y1 == &felt!(0_usize) =>
             {
                 Self::Infinity
             }
             (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 != x2 => {
                 let slope = (y2 - y1) / (x2 - x1);
-                let x3 = slope.pow(bigint!(2)) - (x1 - x2);
+                let x3 = slope.pow(bigint!(2_usize)) - (x1 - x2);
                 let y3 = slope * (x1 - &x3) - y1;
                 Self::Point(x3, y3)
             }
             (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 == x2 && y1 == y2 => {
                 println!("SLOPE I");
-                let slope = felt!(3) * x1.pow(bigint!(2)) + &*A / &(&felt!(2) * y1);
+                let slope = felt!(3_usize) * x1.pow(bigint!(2_usize)) + &*A / &(&felt!(2_usize) * y1);
                 println!("SLOPE II");
-                let x3 = slope.pow(bigint!(2)) - &felt!(2) * x1;
+                let x3 = slope.pow(bigint!(2_usize)) - &felt!(2_usize) * x1;
                 let y3 = slope * (x1 - &x3) - y1;
                 Self::Point(x3, y3)
             }
@@ -83,13 +83,13 @@ impl Add<&Point> for &Point {
                 Point::new_infinity()
             }
             (Point::Point(x1, y1), Point::Point(x2, y2))
-                if x1 == x2 && y1 == y2 && y1 == &felt!(0) =>
+                if x1 == x2 && y1 == y2 && y1 == &felt!(0_usize) =>
             {
                 Point::Infinity
             }
             (Point::Point(x1, y1), Point::Point(x2, y2)) if x1 != x2 => {
                 let slope = (y2 - y1) / (x2 - x1);
-                let x3 = slope.pow(bigint!(2)) - (x1 - x2);
+                let x3 = slope.pow(bigint!(2_usize)) - (x1 - x2);
                 let y3 = slope * (x1 - &x3) - y1;
                 Point::Point(x3, y3)
             }
@@ -97,10 +97,10 @@ impl Add<&Point> for &Point {
                 println!("SLOPE I");
                 // println!("numerador: {:?}", felt!(3) * x1.pow(bigint!(2)) );
                 println!("numerador: {:?}", &*A);
-                println!("denominador: {:?}", &(&felt!(2) * y1));
-                let slope = felt!(3) * x1.pow(bigint!(2)) + &*A / &(&felt!(2) * y1);
+                println!("denominador: {:?}", &(&felt!(2_usize) * y1));
+                let slope = felt!(3_usize) * x1.pow(bigint!(2_usize)) + &*A / &(&felt!(2_usize) * y1);
                 println!("SLOPE II");
-                let x3 = slope.pow(bigint!(2)) - &felt!(2) * x1;
+                let x3 = slope.pow(bigint!(2_usize)) - &felt!(2_usize) * x1;
                 let y3 = slope * (x1 - &x3) - y1;
                 Point::Point(x3, y3)
             }
@@ -156,10 +156,10 @@ impl Mul<usize> for &Point {
     }
 }
 
-impl Mul<&BigInt> for &Point {
+impl Mul<&BigUint> for &Point {
     type Output = Point;
 
-    fn mul(self, scalar: &BigInt) -> Point {
+    fn mul(self, scalar: &BigUint) -> Point {
         assert!(!scalar.is_zero(), "Cant multiply by 0");
 
         let mut current = self.clone();
@@ -167,8 +167,8 @@ impl Mul<&BigInt> for &Point {
         let mut coef = scalar.clone();
         while !&coef.is_zero() {
             println!("coef: {:?}", coef.clone());
-            println!("coef & 1: {:?}", coef.clone() & bigint!(1));
-            if !((&coef & bigint!(1)).is_zero()) {
+            println!("coef & 1: {:?}", coef.clone() & bigint!(1_usize));
+            if !((&coef & bigint!(1_usize)).is_zero()) {
                 println!("if 1");
                 result = &result + &current;
                 println!("if 2");
@@ -190,11 +190,11 @@ mod point_tests {
     };
 
     use super::*;
-    // #[test]
-    // fn test_generator_point() {
-    //     let result = &*G * &*N;
-    //     assert_eq!(result, Point::Infinity)
-    // }
+    #[test]
+    fn test_generator_point() {
+        let result = &*G * &*N;
+        assert_eq!(result, Point::Infinity)
+    }
 
     // #[test]
     // fn point_addition() {

@@ -1,14 +1,16 @@
 use crate::{bigint, constants::PRIME, felt};
-use num_bigint::BigInt;
 use num_integer::Integer;
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign};
+use num_bigint_dig::{BigUint, ModInverse};
+use num_traits::Pow;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FieldElement {
-    pub num: BigInt,
+    pub num: BigUint,
 }
 
 impl FieldElement {
-    pub fn new(num: BigInt) -> Self {
+    pub fn new(num: BigUint) -> Self {
         Self { num }
     }
 }
@@ -85,31 +87,76 @@ impl Mul<FieldElement> for FieldElement {
 // TODO
 //Check perfomance
 impl FieldElement {
-    pub fn pow(&self, n: BigInt) -> Self {
-        let exp = bigint!(n).mod_floor(&(&*PRIME - 1_usize));
-        let mut num = self.num.clone();
-        println!("exp :{:?}", &exp);
-        for i in num_iter::range(bigint!(1), exp) {
-            println!("i :{:?}", &i);
-            num *= &self.num;
-            num = num.mod_floor(&PRIME);
-        }
-        Self {
-            num: num.mod_floor(&PRIME),
+    // pub fn pow(&self, n: BigUint) -> Self {
+        // let exp = bigint!(n).mod_floor(&(&*PRIME - 1_usize));
+        // let mut num = self.num.clone();
+        // println!("exp :{:?}", &exp);
+        // for i in num_iter::range(bigint!(1_usize), exp) {
+        //     println!("i :{:?}", &i);
+        //     num *= &self.num;
+        //     num = num.mod_floor(&PRIME);
+        // }
+        // Self {
+        //     num: num.mod_floor(&PRIME),
+        // }
+
+            // Raise the current field element to the given integer power.
+    pub fn pow(&self, exponent: BigUint) -> FieldElement {
+        println!("USO");
+        if let result = self.num.modpow(&exponent, &*PRIME) {
+            println!("SALIO");
+
+            FieldElement{
+                num: result
+            }
+        } else {
+            unreachable!()
         }
     }
-}
+    }
+// }
+
+    // Raise the current field element to the given integer power.
+    // pub fn pow(&self, exponent: &Integer) -> FieldElement {
+    //     if self.field.prime == Integer::from(1) {
+    //         return FieldElement::new(Integer::from(0), &self.field.clone());
+    //     }
+
+    //     if let Some(result) = self.value.pow_mod_ref(exponent, &self.field.prime) {
+    //         FieldElement::new(Integer::from(result), &self.field)
+    //     } else {
+    //         unreachable!()
+    //     }
+    // }
+
+// impl Div for FieldElement {
+//     type Output = FieldElement;
+
+//     fn div(self, other: FieldElement) -> FieldElement {
+//         if let Ok(inv) = other.value.clone().invert(&self.field.prime) {
+//             FieldElement::new(
+//                 self.value * &inv,
+//                 &self.field
+//             )
+//         } else {
+//             unreachable!()
+//         }
+//     }
+// }
 
 impl Div<FieldElement> for FieldElement {
     type Output = Self;
 
-    fn div(self, other_field_elem: Self) -> Self {
+    fn div(self, other: Self) -> Self {
         // self * other_field_elem.pow(&*PRIME - 2)
-
-        let x = other_field_elem.num.to_biguint().unwrap();
-
-        self * other_field_elem.pow(&*PRIME - 2)
-    }
+        if let Some(inv) = other.num.clone().mod_inverse(&*PRIME) {
+            FieldElement::new(
+                self.num * &inv.to_biguint().unwrap(),
+            )
+        } else {
+            unreachable!()
+        }
+}
 }
 
 impl Div<&FieldElement> for &FieldElement {
@@ -118,7 +165,7 @@ impl Div<&FieldElement> for &FieldElement {
     fn div(self, other_field_elem: &FieldElement) -> FieldElement {
         println!("self :{:?}", &self);
         println!("other_field_elem :{:?}", &other_field_elem);
-        self * &other_field_elem.pow(&*PRIME - 2)
+        self * &other_field_elem.pow(&*PRIME - 2_usize)
     }
 }
 
@@ -151,23 +198,23 @@ mod tests {
 
     #[test]
     fn test_add_two_finite_field_elements() {
-        let first_field_element = felt!(11); //FieldElement::<11>::new(1).unwrap();
-        let second_field_element = felt!(11); //FieldElement::<11>::new(20).unwrap();
+        let first_field_element = felt!(11_usize); //FieldElement::<11>::new(1).unwrap();
+        let second_field_element = felt!(11_usize); //FieldElement::<11>::new(20).unwrap();
 
-        assert_eq!(first_field_element + second_field_element, felt!(22));
+        assert_eq!(first_field_element + second_field_element, felt!(22_usize));
     }
 
     #[test]
     fn test_sub_two_finite_field_elements() {
-        let first_field_element = felt!(20);
-        let second_field_element = felt!(3);
+        let first_field_element = felt!(20_usize);
+        let second_field_element = felt!(3_usize);
 
-        assert_eq!(first_field_element - second_field_element, felt!(17));
+        assert_eq!(first_field_element - second_field_element, felt!(17_usize));
     }
 
     #[test]
     fn test_gx_and_gy_constants() {
-        assert_eq!(GY.pow(bigint!(2)), GX.pow(bigint!(3)) + felt!(7))
+        assert_eq!(GY.pow(bigint!(2_usize)), GX.pow(bigint!(3_usize)) + felt!(7_usize))
     }
 
     // TODO
