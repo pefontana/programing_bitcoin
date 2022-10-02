@@ -1,4 +1,4 @@
-use crate::{bigint, constants::PRIME};
+use crate::{bigint, constants::PRIME, felt};
 use num_bigint::BigInt;
 use num_integer::Integer;
 use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign};
@@ -88,7 +88,9 @@ impl FieldElement {
     pub fn pow(&self, n: BigInt) -> Self {
         let exp = bigint!(n).mod_floor(&(&*PRIME - 1_usize));
         let mut num = self.num.clone();
-        for _ in num_iter::range(bigint!(1), exp) {
+        println!("exp :{:?}", &exp);
+        for i in num_iter::range(bigint!(1), exp) {
+            println!("i :{:?}", &i);
             num *= &self.num;
             num = num.mod_floor(&PRIME);
         }
@@ -102,6 +104,10 @@ impl Div<FieldElement> for FieldElement {
     type Output = Self;
 
     fn div(self, other_field_elem: Self) -> Self {
+        // self * other_field_elem.pow(&*PRIME - 2)
+
+        let x = other_field_elem.num.to_biguint().unwrap();
+
         self * other_field_elem.pow(&*PRIME - 2)
     }
 }
@@ -110,6 +116,8 @@ impl Div<&FieldElement> for &FieldElement {
     type Output = FieldElement;
 
     fn div(self, other_field_elem: &FieldElement) -> FieldElement {
+        println!("self :{:?}", &self);
+        println!("other_field_elem :{:?}", &other_field_elem);
         self * &other_field_elem.pow(&*PRIME - 2)
     }
 }
