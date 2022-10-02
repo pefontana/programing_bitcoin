@@ -190,42 +190,42 @@ mod point_tests {
     };
 
     use super::*;
-    #[test]
-    fn test_generator_point() {
-        let result = &*G * &*N;
-        assert_eq!(result, Point::Infinity)
-    }
+    // #[test]
+    // fn test_generator_point() {
+    //     let result = &*G * &*N;
+    //     assert_eq!(result, Point::Infinity)
+    // }
 
-    #[test]
-    fn point_addition() {
-        let point1 = point!(170, 142);
-        let point2 = point!(60, 139);
-        assert_eq!(point1 + point2, point!(220, 181));
+    // #[test]
+    // fn point_addition() {
+    //     let point1 = point!(170, 142);
+    //     let point2 = point!(60, 139);
+    //     assert_eq!(point1 + point2, point!(220, 181));
 
-        let point3 = point!(47, 71);
-        let point4 = point!(17, 56);
-        assert_eq!(point3 + point4, point!(215, 68));
+    //     let point3 = point!(47, 71);
+    //     let point4 = point!(17, 56);
+    //     assert_eq!(point3 + point4, point!(215, 68));
 
-        let point5 = point!(143, 98);
-        let point6 = point!(76, 66);
-        assert_eq!(point5 + point6, point!(47, 71));
-    }
+    //     let point5 = point!(143, 98);
+    //     let point6 = point!(76, 66);
+    //     assert_eq!(point5 + point6, point!(47, 71));
+    // }
 
-    #[test]
-    fn point_scalar_multiplication() {
-        let point1 = point!(192, 105);
-        assert_eq!(point1 * 2, point!(49, 71));
+    // #[test]
+    // fn point_scalar_multiplication() {
+    //     let point1 = point!(192, 105);
+    //     assert_eq!(point1 * 2, point!(49, 71));
 
-        let point2 = point!(143, 98);
-        assert_eq!(point2 * 2, point!(64, 168));
+    //     let point2 = point!(143, 98);
+    //     assert_eq!(point2 * 2, point!(64, 168));
 
-        let point3 = point!(47, 71);
-        assert_eq!(&point3 * 2, point!(36, 111));
+    //     let point3 = point!(47, 71);
+    //     assert_eq!(&point3 * 2, point!(36, 111));
 
-        assert_eq!(&point3 * 4, point!(194, 51));
+    //     assert_eq!(&point3 * 4, point!(194, 51));
 
-        assert_eq!(&point3 * 8, point!(116, 55));
+    //     assert_eq!(&point3 * 8, point!(116, 55));
 
-        assert_eq!(&point3 * 21, Point::new_infinity());
-    }
+    //     assert_eq!(&point3 * 21, Point::new_infinity());
+    // }
 }
