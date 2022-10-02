@@ -4,7 +4,7 @@ use crate::constants::{A, B};
 use crate::errors::PointNotInTheCurve;
 use crate::field_element::FieldElement;
 use crate::{bigint, felt};
-use num_bigint_dig::BigUint;
+use num_bigint_dig::BigInt;
 use num_traits::identities::Zero;
 // Point of y**2 = x**2 + a*x + b eliptic curve
 #[derive(Clone, Debug, PartialEq)]
@@ -60,7 +60,8 @@ impl Add<Point> for Point {
             }
             (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 == x2 && y1 == y2 => {
                 println!("SLOPE I");
-                let slope = felt!(3_usize) * x1.pow(bigint!(2_usize)) + &*A / &(&felt!(2_usize) * y1);
+                let slope =
+                    felt!(3_usize) * x1.pow(bigint!(2_usize)) + &*A / &(&felt!(2_usize) * y1);
                 println!("SLOPE II");
                 let x3 = slope.pow(bigint!(2_usize)) - &felt!(2_usize) * x1;
                 let y3 = slope * (x1 - &x3) - y1;
@@ -77,28 +78,41 @@ impl Add<&Point> for &Point {
 
     fn add(self, other_point: &Point) -> Point {
         match (self, other_point) {
-            (Point::Infinity, _) => other_point.clone(),
-            (_, Point::Infinity) => self.clone(),
+            (Point::Infinity, _) => {
+                println!("ADD MATCH 1");
+                other_point.clone()
+            }
+
+            (_, Point::Infinity) => {
+                println!("ADD MATCH 2");
+                self.clone()
+            }
             (Point::Point(x1, y1), Point::Point(x2, y2)) if x1 == x2 && y1 != y2 => {
+                println!("ADD MATCH 3");
                 Point::new_infinity()
             }
             (Point::Point(x1, y1), Point::Point(x2, y2))
                 if x1 == x2 && y1 == y2 && y1 == &felt!(0_usize) =>
             {
+                println!("ADD MATCH 4");
                 Point::Infinity
             }
             (Point::Point(x1, y1), Point::Point(x2, y2)) if x1 != x2 => {
+                println!("ADD MATCH 5");
                 let slope = (y2 - y1) / (x2 - x1);
                 let x3 = slope.pow(bigint!(2_usize)) - (x1 - x2);
                 let y3 = slope * (x1 - &x3) - y1;
                 Point::Point(x3, y3)
             }
             (Point::Point(x1, y1), Point::Point(x2, y2)) if x1 == x2 && y1 == y2 => {
+                println!("ADD MATCH 6");
+
                 println!("SLOPE I");
                 // println!("numerador: {:?}", felt!(3) * x1.pow(bigint!(2)) );
                 println!("numerador: {:?}", &*A);
                 println!("denominador: {:?}", &(&felt!(2_usize) * y1));
-                let slope = felt!(3_usize) * x1.pow(bigint!(2_usize)) + &*A / &(&felt!(2_usize) * y1);
+                let slope =
+                    felt!(3_usize) * x1.pow(bigint!(2_usize)) + &*A / &(&felt!(2_usize) * y1);
                 println!("SLOPE II");
                 let x3 = slope.pow(bigint!(2_usize)) - &felt!(2_usize) * x1;
                 let y3 = slope * (x1 - &x3) - y1;
@@ -156,10 +170,10 @@ impl Mul<usize> for &Point {
     }
 }
 
-impl Mul<&BigUint> for &Point {
+impl Mul<&BigInt> for &Point {
     type Output = Point;
 
-    fn mul(self, scalar: &BigUint) -> Point {
+    fn mul(self, scalar: &BigInt) -> Point {
         assert!(!scalar.is_zero(), "Cant multiply by 0");
 
         let mut current = self.clone();
@@ -186,10 +200,29 @@ impl Mul<&BigUint> for &Point {
 mod point_tests {
     use crate::{
         constants::{G, N},
-        felt, point,
+        felt, point, point_str, felt_str,
     };
 
     use super::*;
+
+    #[test]
+    fn test_sum() {
+        assert_eq!(
+            &*G + &point_str!(b"89565891926547004231252920425935692360644145829622209833684329913297188986597", b"12158399299693830322967808612713398636155367887041628176798871954788371653930"),
+            point_str!(b"112711660439710606056748659173929673102114977341539408544630613555209775888121", b"25583027980570883691656905877401976406448868254816295069919888960541586679410")
+
+
+        )
+    }
+
+    #[test]
+    fn test_multiplication() {
+        assert_eq!(
+            &*G * &bigint!(1245_usize),
+            point_str!(b"16216027976566519154773591522616661330055461199350620083574692312367257363719", b"38836197644273850215659763828493766955110790713669041342445922559152527550892")
+        )
+    }
+
     #[test]
     fn test_generator_point() {
         let result = &*G * &*N;

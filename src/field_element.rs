@@ -1,16 +1,16 @@
 use crate::{bigint, constants::PRIME, felt};
+use num_bigint_dig::{BigInt, ModInverse};
 use num_integer::Integer;
-use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign};
-use num_bigint_dig::{BigUint, ModInverse};
 use num_traits::Pow;
+use std::ops::{Add, AddAssign, Div, Mul, MulAssign, Sub, SubAssign};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FieldElement {
-    pub num: BigUint,
+    pub num: BigInt,
 }
 
 impl FieldElement {
-    pub fn new(num: BigUint) -> Self {
+    pub fn new(num: BigInt) -> Self {
         Self { num }
     }
 }
@@ -88,46 +88,44 @@ impl Mul<FieldElement> for FieldElement {
 //Check perfomance
 impl FieldElement {
     // pub fn pow(&self, n: BigUint) -> Self {
-        // let exp = bigint!(n).mod_floor(&(&*PRIME - 1_usize));
-        // let mut num = self.num.clone();
-        // println!("exp :{:?}", &exp);
-        // for i in num_iter::range(bigint!(1_usize), exp) {
-        //     println!("i :{:?}", &i);
-        //     num *= &self.num;
-        //     num = num.mod_floor(&PRIME);
-        // }
-        // Self {
-        //     num: num.mod_floor(&PRIME),
-        // }
+    // let exp = bigint!(n).mod_floor(&(&*PRIME - 1_usize));
+    // let mut num = self.num.clone();
+    // println!("exp :{:?}", &exp);
+    // for i in num_iter::range(bigint!(1_usize), exp) {
+    //     println!("i :{:?}", &i);
+    //     num *= &self.num;
+    //     num = num.mod_floor(&PRIME);
+    // }
+    // Self {
+    //     num: num.mod_floor(&PRIME),
+    // }
 
-            // Raise the current field element to the given integer power.
-    pub fn pow(&self, exponent: BigUint) -> FieldElement {
+    // Raise the current field element to the given integer power.
+    pub fn pow(&self, exponent: BigInt) -> FieldElement {
         println!("USO");
         if let result = self.num.modpow(&exponent, &*PRIME) {
             println!("SALIO");
 
-            FieldElement{
-                num: result
-            }
+            FieldElement { num: result }
         } else {
             unreachable!()
         }
     }
-    }
+}
 // }
 
-    // Raise the current field element to the given integer power.
-    // pub fn pow(&self, exponent: &Integer) -> FieldElement {
-    //     if self.field.prime == Integer::from(1) {
-    //         return FieldElement::new(Integer::from(0), &self.field.clone());
-    //     }
+// Raise the current field element to the given integer power.
+// pub fn pow(&self, exponent: &Integer) -> FieldElement {
+//     if self.field.prime == Integer::from(1) {
+//         return FieldElement::new(Integer::from(0), &self.field.clone());
+//     }
 
-    //     if let Some(result) = self.value.pow_mod_ref(exponent, &self.field.prime) {
-    //         FieldElement::new(Integer::from(result), &self.field)
-    //     } else {
-    //         unreachable!()
-    //     }
-    // }
+//     if let Some(result) = self.value.pow_mod_ref(exponent, &self.field.prime) {
+//         FieldElement::new(Integer::from(result), &self.field)
+//     } else {
+//         unreachable!()
+//     }
+// }
 
 // impl Div for FieldElement {
 //     type Output = FieldElement;
@@ -150,13 +148,11 @@ impl Div<FieldElement> for FieldElement {
     fn div(self, other: Self) -> Self {
         // self * other_field_elem.pow(&*PRIME - 2)
         if let Some(inv) = other.num.clone().mod_inverse(&*PRIME) {
-            FieldElement::new(
-                self.num * &inv.to_biguint().unwrap(),
-            )
+            FieldElement::new(self.num * &inv)
         } else {
             unreachable!()
         }
-}
+    }
 }
 
 impl Div<&FieldElement> for &FieldElement {
@@ -214,7 +210,10 @@ mod tests {
 
     #[test]
     fn test_gx_and_gy_constants() {
-        assert_eq!(GY.pow(bigint!(2_usize)), GX.pow(bigint!(3_usize)) + felt!(7_usize))
+        assert_eq!(
+            GY.pow(bigint!(2_usize)),
+            GX.pow(bigint!(3_usize)) + felt!(7_usize)
+        )
     }
 
     // TODO
