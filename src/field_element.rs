@@ -1,6 +1,6 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-use rug::Integer;
+use rug::{Complete, Integer};
 
 use crate::constants::PRIME;
 
@@ -11,8 +11,13 @@ pub struct FieldElement {
 
 impl FieldElement {
     pub fn new(num: Integer) -> Self {
-        Self {
-            num: num % PRIME.clone(),
+        if num < 0 || num >= *PRIME {
+            let (_, normalized_value) = num.div_rem_euc_ref(&PRIME).complete();
+            FieldElement {
+                num: normalized_value,
+            }
+        } else {
+            FieldElement { num }
         }
     }
 
@@ -58,5 +63,24 @@ impl Div for FieldElement {
         } else {
             unreachable!()
         }
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_field_element() {
+        let a = FieldElement::new(PRIME.clone() + 1);
+        assert_eq!(a.num, Integer::from(1));
+
+        let b = FieldElement::new(Integer::from(-1));
+        assert_eq!(b.num, Integer::from(PRIME.clone() - 1));
+
+        let c = FieldElement::new(Integer::from(765));
+        assert_eq!(c.num, Integer::from(765));
+
+        let d = FieldElement::new(Integer::from(-765));
+        assert_eq!(d.num, Integer::from(PRIME.clone() - 765));
     }
 }
