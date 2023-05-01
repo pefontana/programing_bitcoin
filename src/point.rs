@@ -86,13 +86,9 @@ impl Mul<&Integer> for &Point {
         let mut coef = scalar.clone();
         while coef != Integer::ZERO {
             if (&coef & Integer::from(1)) != Integer::ZERO {
-                println!("if 1");
                 result = result + current.clone();
-                println!("if 2");
             }
-            println!("a");
             current = current.clone() + current.clone();
-            println!("b");
             coef >>= 1;
         }
         result
