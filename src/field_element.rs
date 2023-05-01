@@ -46,11 +46,27 @@ impl Sub<FieldElement> for FieldElement {
     }
 }
 
+impl Sub<&FieldElement> for &FieldElement {
+    type Output = FieldElement;
+
+    fn sub(self, other_field_elem: &FieldElement) -> FieldElement {
+        FieldElement::new(self.num.clone() - other_field_elem.num.clone())
+    }
+}
+
 impl Mul<FieldElement> for FieldElement {
     type Output = Self;
 
     fn mul(self, other_field_elem: Self) -> Self {
         FieldElement::new(self.num * other_field_elem.num)
+    }
+}
+
+impl Mul<&FieldElement> for &FieldElement {
+    type Output = FieldElement;
+
+    fn mul(self, other_field_elem: &FieldElement) -> FieldElement {
+        FieldElement::new(self.num.clone() * other_field_elem.num.clone())
     }
 }
 
@@ -60,6 +76,18 @@ impl Div for FieldElement {
     fn div(self, other: FieldElement) -> FieldElement {
         if let Ok(inv) = other.num.invert(&PRIME) {
             FieldElement::new(self.num * &inv)
+        } else {
+            unreachable!()
+        }
+    }
+}
+
+impl Div for &FieldElement {
+    type Output = FieldElement;
+
+    fn div(self, other: &FieldElement) -> FieldElement {
+        if let Ok(inv) = other.num.clone().invert(&PRIME) {
+            FieldElement::new(self.num.clone() * &inv)
         } else {
             unreachable!()
         }
