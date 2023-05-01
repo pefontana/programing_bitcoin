@@ -27,17 +27,6 @@ impl Point {
         Point::Infinity
     }
 
-    // pub fn new_point_from_ref(
-    //     x: &FieldElement,
-    //     y: &FieldElement,
-    // ) -> Result<Self, BitcoinError> {
-    //     if y.pow(&felt!(2)) != x.pow(&felt!(3)) + *A * x + *B {
-    //         return Err(PointNotInTheCurve);
-    //     }
-
-    //     Ok(Point::Point(x.clone(), y.clone()))
-    // }
-
     /// Returns the slope of the tangent line at a given point
     pub fn tangent_slope(&self) -> FieldElement {
         match self {
@@ -60,35 +49,6 @@ impl Point {
 impl Add<Point> for Point {
     type Output = Self;
     fn add(self, other_point: Point) -> Self {
-        // match (&self, &other_point) {
-        //     (Self::Infinity, _) => other_point,
-        //     (_, Self::Infinity) => self,
-        //     (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 == x2 && y1 != y2 => {
-        //         Self::new_infinity()
-        //     }
-        //     (Self::Point(x1, y1), Self::Point(x2, y2))
-        //         if x1 == x2 && y1 == y2 && y1 == &felt!(0) =>
-        //     {
-        //         Self::Infinity
-        //     }
-        //     (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 != x2 => {
-        //         let slope = (y2 - y1) / (x2 - x1);
-        //         let x3 = slope.pow(&felt!(2)) - (x1 - x2);
-        //         let y3 = &(slope * (x1 - &x3)) - y1;
-        //         Self::Point(x3, y3)
-        //     }
-        //     (Self::Point(x1, y1), Self::Point(x2, y2)) if x1 == x2 && y1 == y2 => {
-        //         println!("SLOPE I");
-        //         let slope = felt!(3) * x1.pow(&felt!(2)) + &*A / &(&felt!(2) * y1);
-        //         println!("SLOPE II");
-        //         let x3 = slope.pow(&felt!(2)) - &felt!(2) * x1;
-        //         let y3 = &(slope * (x1 - &x3)) - y1;
-        //         Self::Point(x3, y3)
-        //     }
-
-        //     _ => panic!("Can not handle field element addition"),
-        // }
-
         match (&self, &other_point) {
             (Self::Infinity, _) => other_point,
             (_, Self::Infinity) => self,
@@ -111,8 +71,6 @@ impl Add<Point> for Point {
                     return Point::new_point(x3, y).unwrap();
                 }
             }
-
-            _ => panic!("Can not handle field element addition"),
         }
     }
 }
@@ -121,14 +79,12 @@ impl Mul<&Integer> for &Point {
     type Output = Point;
 
     fn mul(self, scalar: &Integer) -> Point {
-        // assert!(!scalar.is_zero(), "Cant multiply by 0");
+        assert!(scalar != &Integer::ZERO, "Cant multiply by 0");
 
         let mut current = self.clone();
         let mut result = Point::new_infinity();
         let mut coef = scalar.clone();
         while coef != Integer::ZERO {
-            // println!("coef: {:?}", coef.clone());
-            // println!("coef & 1: {:?}", coef.clone() & felt!(1_usize));
             if (&coef & Integer::from(1)) != Integer::ZERO {
                 println!("if 1");
                 result = result + current.clone();
