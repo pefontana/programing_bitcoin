@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use rug::Integer;
 
 use lazy_static::lazy_static;

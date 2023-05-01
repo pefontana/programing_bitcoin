@@ -104,13 +104,13 @@ mod tests {
         assert_eq!(a.num, Integer::from(1));
 
         let b = FieldElement::new(Integer::from(-1));
-        assert_eq!(b.num, Integer::from(PRIME.clone() - 1));
+        assert_eq!(b.num, (PRIME.clone() - 1));
 
         let c = FieldElement::new(Integer::from(765));
         assert_eq!(c.num, Integer::from(765));
 
         let d = FieldElement::new(Integer::from(-765));
-        assert_eq!(d.num, Integer::from(PRIME.clone() - 765));
+        assert_eq!(d.num, (PRIME.clone() - 765));
     }
 
     #[test]
@@ -127,7 +127,7 @@ mod tests {
             )
         );
         assert_eq!(
-            felt!(half_prime.clone() + 56) + felt!(half_prime.clone() + 12364563),
+            felt!(half_prime.clone() + 56) + felt!(half_prime + 12364563),
             felt!(12364618)
         );
     }
@@ -156,7 +156,7 @@ mod tests {
             )
         );
         assert_eq!(
-            felt!(half_prime.clone()) - felt!(half_prime.clone() + 123123),
+            felt!(half_prime.clone()) - felt!(half_prime + 123123),
             felt_str!(
                 "115792089237316195423570985008687907853269984665640564039457584007908834548540"
             )
@@ -181,7 +181,7 @@ mod tests {
             )
         );
         assert_eq!(
-            felt!(half_prime.clone()) * felt!(half_prime.clone() + 123123),
+            felt!(half_prime.clone()) * felt!(half_prime + 123123),
             felt_str!(
                 "86844066927987146567678238756515930889952488499230423029593188005931625942186"
             )
@@ -213,7 +213,7 @@ mod tests {
             )
         );
         assert_eq!(
-            felt!(half_prime.clone()) / felt!(half_prime.clone() + 123123),
+            felt!(half_prime.clone()) / felt!(half_prime + 123123),
             felt_str!(
                 "6715842427206034246540806139796059615262855777760679549276262319238782419057"
             )
@@ -246,7 +246,7 @@ mod tests {
             )
         );
         assert_eq!(
-            felt!(half_prime.clone()).pow(&felt!(half_prime.clone() + 123123)),
+            felt!(half_prime.clone()).pow(&felt!(half_prime + 123123)),
             felt_str!(
                 "34200881240540466468744785772900404633747554619317806293093634094790802146351"
             )

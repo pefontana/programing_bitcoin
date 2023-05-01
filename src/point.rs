@@ -92,15 +92,15 @@ impl Add<Point> for Point {
         match (&self, &other_point) {
             (Self::Infinity, _) => other_point,
             (_, Self::Infinity) => self,
-            (Self::Point(x1, y1), Self::Point(x2, y2)) => {
+            (Self::Point(x1, y1), Self::Point(x2, _y2)) => {
                 if self == other_point {
                     if y1.num == Integer::ZERO {
-                        return Point::Infinity;
+                        Point::Infinity
                     } else {
                         let slope = self.tangent_slope();
                         let x3 = slope.pow(&felt!(2)) - felt!(2) * x1.clone();
                         let y = slope * (x1 - &x3) - y1.clone();
-                        return Point::new_point(x3, y).unwrap();
+                        Point::new_point(x3, y).unwrap()
                     }
                 } else if x1 == x2 {
                     return Point::Infinity;
@@ -126,7 +126,7 @@ impl Mul<&Integer> for &Point {
         let mut current = self.clone();
         let mut result = Point::new_infinity();
         let mut coef = scalar.clone();
-        while &coef != &Integer::ZERO {
+        while coef != Integer::ZERO {
             // println!("coef: {:?}", coef.clone());
             // println!("coef & 1: {:?}", coef.clone() & felt!(1_usize));
             if (&coef & Integer::from(1)) != Integer::ZERO {
