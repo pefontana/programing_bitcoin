@@ -21,6 +21,10 @@ impl FieldElement {
         }
     }
 
+    pub fn from_hex(str: String) -> Self {
+        FieldElement::new(Integer::from_str_radix(str.strip_prefix("0x").unwrap(), 16).unwrap())
+    }
+
     pub fn pow(&self, exponent: &FieldElement) -> FieldElement {
         if let Some(result) = self.num.pow_mod_ref(&exponent.num, &PRIME) {
             FieldElement::new(Integer::from(result))
@@ -73,6 +77,7 @@ impl Mul<&FieldElement> for &FieldElement {
 impl Div for FieldElement {
     type Output = FieldElement;
 
+    #[allow(clippy::suspicious_arithmetic_impl)]
     fn div(self, other: FieldElement) -> FieldElement {
         if let Ok(inv) = other.num.invert(&PRIME) {
             FieldElement::new(self.num * &inv)
@@ -85,6 +90,7 @@ impl Div for FieldElement {
 impl Div for &FieldElement {
     type Output = FieldElement;
 
+    #[allow(clippy::suspicious_arithmetic_impl)]
     fn div(self, other: &FieldElement) -> FieldElement {
         if let Ok(inv) = other.num.clone().invert(&PRIME) {
             FieldElement::new(self.num.clone() * &inv)
