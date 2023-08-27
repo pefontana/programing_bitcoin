@@ -26,7 +26,7 @@ impl Signature {
         let s_inv = &self
             .s
             .clone()
-            .pow_mod(&(&*N - Integer::from(2)), &*N)
+            .pow_mod(&(&*N - Integer::from(2)), &N)
             .unwrap();
         let u = (z * s_inv.clone()) % &*N;
         let v = (&self.r * s_inv.clone()) % &*N;
