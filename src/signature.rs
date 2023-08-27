@@ -72,7 +72,7 @@ mod point_tests {
             16,
         )
         .unwrap();
-    
+
         assert!(signature_2.verify(&z_2, &point));
     }
 }
