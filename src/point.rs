@@ -30,6 +30,13 @@ impl Point {
         Point::Infinity
     }
 
+    pub fn get_x(&self) -> &FieldElement {
+        match self {
+            Point::Point(x, _) => x,
+            _ => panic!(),
+        }
+    }
+
     /// Returns the slope of the tangent line at a given point
     pub fn tangent_slope(&self) -> FieldElement {
         match self {

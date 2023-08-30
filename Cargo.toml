@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 lazy_static = "1.4.0"
-rug = { version = "1.20", default-features = false, features = ["integer"]}
+rand = "0.8.5"
+rug = { version = "1.20", default-features = false, features = ["integer", "rand"]}
 thiserror = "1.0.40"
